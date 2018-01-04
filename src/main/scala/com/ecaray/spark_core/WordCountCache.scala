@@ -9,9 +9,8 @@ import org.apache.spark.{SparkContext, SparkConf}
 --master spark://192.168.9.109:7070 \
 --deploy-mode cluster \
 --driver-memory 500m \
---executor-memory 1536m \
+--executor-memory 1g \
 --class  com.ecaray.spark_core.WordCountCache \
---conf  "spark.ui.port=5050" \
 /opt/data/spark-1.0-SNAPSHOT-jar-with-dependencies.jar
  */
 object WordCountCache {
@@ -20,8 +19,9 @@ object WordCountCache {
       .setAppName("WordCountCache")
       // .setMaster("local[*]")
       .setMaster("spark://192.168.9.109:7070")
+      .set("spark.memory.fraction","0.75")
     val sc = new SparkContext(conf)
-    val textfilerdd = sc.textFile("/opt/data/20171025-stif_act.sql")
+    val textfilerdd = sc.textFile("/opt/data/data.txt")
       .filter(_.length>0)
       .flatMap(
         (_.split(" ").map((_,1)) ))
