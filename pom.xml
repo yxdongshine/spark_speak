@@ -37,6 +37,14 @@
             <version>${spark.version}</version>
             <scope>compile</scope>
         </dependency>
+
+        <!-- Spark SQL -->
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_2.10</artifactId>
+            <version>${spark.version}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

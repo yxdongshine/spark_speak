@@ -33,7 +33,8 @@ object WordCountCache {
     //job2
     textfilerdd
       .reduceByKey(_+_)
-      .foreach(println)
+      .foreachPartition(println(_))
+      //.foreach(println)
 
     Thread.sleep(Long.MaxValue)
   }
