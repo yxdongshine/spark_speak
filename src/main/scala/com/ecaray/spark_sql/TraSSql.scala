@@ -1,19 +1,20 @@
 package com.ecaray.spark_sql
 
+import com.ecaray.spark_sql.WordCountSSql.Word
 import org.apache.spark.sql.{DataFrame, SQLContext}
 import org.apache.spark.{SparkContext, SparkConf}
 
 /**
- * Created by YXD on 2018/1/10.
+ * Created by YXD on 2018/1/11.
  */
-object WordCountSSql {
+object TraSSql {
   case class Word (
                     content:String
-                   )
+                    )
   def main(args: Array[String]) {
     //创建配置
     val conf = new SparkConf()
-      .setAppName("WordCountSSql")
+      .setAppName("TraSSql")
       //.setMaster("local[*]")
       .setMaster("spark://192.168.9.109:7070")
       .set("spark.memory.fraction","0.75")
@@ -25,7 +26,7 @@ object WordCountSSql {
     import sqlContext.implicits._
     //val data = Array("0000-00-00 0000-00-00")
     //加载文件形成DataFrame
-    val logDf: DataFrame = sc
+    val wDf: DataFrame = sc
       .textFile("/opt/data/data.txt")
       //.parallelize(data)
       .flatMap(_.split(" "))
@@ -33,18 +34,20 @@ object WordCountSSql {
         c => Word(c)
       )
       .toDF()
-    //注册成临时表
-    logDf.registerTempTable("word")
-    sqlContext.cacheTable("word")
-    //统计操作
-    val resultDf: DataFrame = sqlContext.sql(
-      "SELECT content,COUNT(w.content) AS num " +
-      "FROM word AS w WHERE LENGTH(w.content) > 0 " +
-      "GROUP BY w.content " +
-      "HAVING count(content) > 0 ")
-    //输出
-    resultDf.show()
+    //写出到json文件
+    wDf
+      .select("content")
+      .write
+      .format("json")
+      .save("/opt/data/wordJson")//路径
 
-    Thread.sleep(Long.MaxValue)
+    //写出到parquet文件
+    wDf
+      .select("content")
+      .write
+      .format("parquet")
+      .save("/opt/data/wordParquet")//路径
+
   }
+
 }
