@@ -27,6 +27,7 @@
         <spark.scala.version>2.10</spark.scala.version>
         <databricks.scala.version>2.10</databricks.scala.version>
         <databricks.spark.csv.version>1.1.0</databricks.spark.csv.version>
+        <kafka.version>0.8.2.1</kafka.version>
     </properties>
 
     <dependencies>
@@ -45,6 +46,26 @@
             <version>${spark.version}</version>
             <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-hive_${spark.scala.version}</artifactId>
+            <version>${spark.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!--kafka-->
+         <dependency>
+             <groupId>org.apache.kafka</groupId>
+             <artifactId>kafka_2.10</artifactId>
+             <version>${kafka.version}</version>
+         </dependency>
+
+         <dependency>
+             <groupId>org.apache.kafka</groupId>
+             <artifactId>kafka-clients</artifactId>
+             <version>0.8.2.1</version>
+         </dependency>
 
         <!-- mysql -->
         <dependency>
