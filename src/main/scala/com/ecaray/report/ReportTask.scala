@@ -11,13 +11,18 @@ import scala.util.Random
  * Created by YXD on 2018/4/26.
  */
 object ReportTask {
-
+  val DELIMITER: String = "#"
   def main(args: Array[String]) {
     val conf = new SparkConf()
       .setAppName("ReportTask")
     var sql = ""
+    var pos = ""
     if (args != null && args.length > 0) {
-      sql = args(0)
+       val splitArr = args(0).split(DELIMITER)
+       if(2 == splitArr.length){
+         pos = splitArr(0)
+         sql = splitArr(1)
+       }
     }
     val sparkContext = SparkContext.getOrCreate(conf)
     //集成hiveContext
@@ -28,7 +33,7 @@ object ReportTask {
     result.foreach(f = row => {
       //发送出去
       val key = new Random().nextInt().toString
-      val message = row.get(0).toString
+      val message = pos+DELIMITER+row.get(0)
       ReportProducer.getReportProducerInstance.sendMessage(key,message)
     })
   }
