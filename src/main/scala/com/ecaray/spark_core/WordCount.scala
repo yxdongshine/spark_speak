@@ -22,6 +22,6 @@ object WordCount {
       .reduceByKey(_+_)
       .foreach(println)
 
-    Thread.sleep(Long.MaxValue)
+    //Thread.sleep(Long.MaxValue)
   }
 }

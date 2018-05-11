@@ -3,8 +3,8 @@ package com.ecaray.report
 import com.ecaray.kafka.ReportProducer
 import org.apache.spark.sql.{Row, DataFrame}
 import org.apache.spark.sql.hive.HiveContext
-import org.apache.spark.{SparkConf, SparkContext}
-
+import org.apache.spark.SparkConf
+import org.apache.spark.SparkContext
 import scala.util.Random
 
 /**
@@ -15,27 +15,46 @@ object ReportTask {
   def main(args: Array[String]) {
     val conf = new SparkConf()
       .setAppName("ReportTask")
+    //.setMaster("local[*]") //设置本地模式
+    //.setMaster("spark://192.168.9.81:7070") //设置集群模式运行
+    //val args = Array("4@$12#SELECT COUNT(1) FROM tra_order WHERE date= 2018-05-03")
     var sql = ""
     var pos = ""
     if (args != null && args.length > 0) {
-       val splitArr = args(0).split(DELIMITER)
-       if(2 == splitArr.length){
-         pos = splitArr(0)
-         sql = splitArr(1)
-       }
+      //先将前后双引号去掉
+      if(args(0).length > 2){
+        args(0) = args(0).substring(1,args(0).length-1)
+        val splitArr = args(0).split(DELIMITER)
+        if(2 == splitArr.length){
+          pos = splitArr(0)
+          sql = splitArr(1)
+        }
+      }
     }
-    val sparkContext = SparkContext.getOrCreate(conf)
+    val sparkContext =  SparkContext.getOrCreate(conf)
     //集成hiveContext
     val hiveContext =  new HiveContext(sparkContext)
+    //使用数据库
+    hiveContext.sql("use report")
     //执行sql
     val result:DataFrame = hiveContext.sql(sql)
-    //这里开始调用kafka消息
-    result.foreach(f = row => {
-      //发送出去
-      val key = new Random().nextInt().toString
-      val message = pos+DELIMITER+row.get(0)
-      ReportProducer.getReportProducerInstance.sendMessage(key,message)
-    })
+    //发送出去
+    val key = new Random().nextInt().toString
+    var message = pos+DELIMITER
+    /* if(0 < result.count()){
+      val row = result.first()
+      if(null != row){
+        message += row.get(0)
+      }
+    }else{
+      message += 0
+    }*/
+   val row = result.first()
+   if(null != row){
+     message += row.get(0)
+   }
+   //这里开始调用kafka消息
+   ReportProducer.getReportProducerInstance.sendMessage(key,message)
   }
 
 }

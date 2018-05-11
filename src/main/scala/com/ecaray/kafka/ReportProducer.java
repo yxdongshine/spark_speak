@@ -9,7 +9,7 @@ import java.util.Properties;
  * Created by YXD on 2018/4/26.
  */
 public class ReportProducer {
-    public final String TOPIC_NAME = "report_message";
+    public final String TOPIC_NAME = "report";
     //构造私有
     private ReportProducer(){
 
@@ -35,7 +35,7 @@ public class ReportProducer {
      */
     public static ProducerConfig init(){
         Properties props = new Properties();
-        props.put("metadata.broker.list", "broker1:9092,broker2:9092 ");
+        props.put("metadata.broker.list", "192.168.9.109:9092");
         props.put("serializer.class", "kafka.serializer.StringEncoder");
         props.put("request.required.acks", "1");//表示至少一个broker响应
         ProducerConfig config = new ProducerConfig(props);
