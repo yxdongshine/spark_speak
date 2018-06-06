@@ -15,6 +15,16 @@ object ReportTask {
   def main(args: Array[String]) {
     val conf = new SparkConf()
       .setAppName("ReportTask")
+      .set("spark.rpc.askTimeout","600s")
+      .set("spark.network.timeout","600s")
+      .set("spark.executor.heartbeatInterval","600s")
+      .set("spark.default.parallelism","30")
+      .set("spark.storage.memoryFraction","0.2")
+      .set("spark.shuffle.memoryFraction","0.6")
+      .set("spark.shuffle.file.buffer","256k")
+      .set("spark.reducer.maxSizeInFlight","128m")
+      .set("spark.shuffle.manager","hash")
+      .set("spark.shuffle.consolidateFiles","true")
     //.setMaster("local[*]") //设置本地模式
     //.setMaster("spark://192.168.9.81:7070") //设置集群模式运行
     //val args = Array("4@$12#SELECT COUNT(1) FROM tra_order WHERE date= 2018-05-03")
@@ -36,11 +46,13 @@ object ReportTask {
     val hiveContext =  new HiveContext(sparkContext)
     //使用数据库
     hiveContext.sql("use report")
-    //执行sql
-    val result:DataFrame = hiveContext.sql(sql)
     //发送出去
     val key = new Random().nextInt().toString
     var message = pos+DELIMITER
+    ReportProducer.getReportProducerInstance.sendMessage(key,message+sql)
+    //执行sql
+    val result:DataFrame = hiveContext.sql(sql)
+
     /* if(0 < result.count()){
       val row = result.first()
       if(null != row){
@@ -53,8 +65,18 @@ object ReportTask {
    if(null != row){
      message += row.get(0)
    }
+   /* var num = 0L
+    result.foreachPartition( iter =>{
+     iter.foreach(
+       row =>{
+         num += row.getLong(0)
+      }
+     )
+    })
+    message += num*/
    //这里开始调用kafka消息
    ReportProducer.getReportProducerInstance.sendMessage(key,message)
+   //Thread.sleep(Long.MaxValue)
   }
 
 }

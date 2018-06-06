@@ -28,12 +28,12 @@ object ReportTest {
       }
     }
     val sparkContext = new SparkContext(conf)
-    val sqlContext = new SQLContext(sparkContext);
-    val result: DataFrame = sqlContext.read.text("E:\\test.txt")
+    val sqlContext = new SQLContext(sparkContext)
+    val result: DataFrame = sqlContext.read.text("E:\\abc\\test.txt")
     //发送出去
     val key = new Random().nextInt().toString
     var message = pos+DELIMITER
-   /* if(0 < result.count()){
+    /*if(0 < result.count()){
       val row = result.first()
       if(null != row){
         message += row.get(0)
@@ -41,9 +41,16 @@ object ReportTest {
     }else{
       message += 0
     }*/
-
+    result.foreachPartition( iter =>{
+      iter.foreach(
+        row =>{
+          println(row.getAs(0))
+        }
+      )
+    })
+    println(message)
     //这里开始调用kafka消息
-    ReportProducer.getReportProducerInstance.sendMessage(key,message)
+   ReportProducer.getReportProducerInstance.sendMessage(key,message)
   }
 
 }
